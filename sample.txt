@@ -3,4 +3,6 @@ Welcome to Git for DevOps!
 This file will be used to practice:
 1. Checking git status (untracked files)
 2. Staging files (git add)
+sdfdsd hahah
 3. Committing files (git commit)
+dfsdsdfsdfsdfsdfdsf
