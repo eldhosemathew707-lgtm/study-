@@ -1,0 +1,38 @@
+name: 01 - Hello Python Actions
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      student_name:
+        description: 'Your name or message'
+        required: true
+        default: 'GitHub Explorer'
+
+jobs:
+  say-hello:
+    name: Run First Python Job
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Check out repository code
+        uses: actions/checkout@v4
+
+      - name: 2. Inspect Runner Environment
+        run: |
+          echo "Hello from GitHub Actions, ${{ inputs.student_name || github.actor }}!"
+          echo "Repository: ${{ github.repository }}"
+          echo "Triggered by event: ${{ github.event_name }}"
+          echo "Runner OS: ${{ runner.os }}"
+          echo "Commit SHA: ${{ github.sha }}"
+
+      - name: 3. Verify Python on Runner
+        run: |
+          python3 --version
+          python3 -c "import sys, platform; print(f'Python {platform.python_version()} on {platform.system()} {platform.release()}')"
+
+      - name: 4. Run our hello_world.py script
+        run: python3 hello_world.py
