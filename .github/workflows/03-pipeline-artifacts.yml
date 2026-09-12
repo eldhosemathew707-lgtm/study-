@@ -1,0 +1,69 @@
+name: 03 - Multi-Stage Pipeline & Artifacts
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  # Stage 1: Code Quality & Syntax Validation
+  lint:
+    name: 1. Code Quality & Syntax
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check Python Syntax
+        run: |
+          echo "Checking syntax of all Python files..."
+          python -m py_compile hello_world.py test_hello_world.py
+          echo "Syntax check passed!"
+
+  # Stage 2: Automated Unit Testing (waits for Stage 1)
+  test:
+    name: 2. Run Test Suite
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run Tests
+        run: python -m unittest test_hello_world.py -v
+
+  # Stage 3: Packaging & Upload Artifact (waits for Stage 2)
+  package:
+    name: 3. Package & Upload Artifact
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Prepare Release Package
+        run: |
+          mkdir -p dist
+          cp hello_world.py dist/
+          echo "Build completed on $(date)" > dist/build_info.txt
+          echo "Commit SHA: ${{ github.sha }}" >> dist/build_info.txt
+          echo "Built by: ${{ github.actor }}" >> dist/build_info.txt
+
+      - name: Upload Build Artifact to GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-release-bundle
+          path: dist/
+          retention-days: 7
